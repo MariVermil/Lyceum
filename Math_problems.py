@@ -1,9 +1,7 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
-from PyQt5.QtWidgets import QLabel, QLineEdit, QPushButton
-from PyQt5.QtCore import *
+from PyQt5.QtWidgets import QApplication, QMainWindow
 import operator
 from random import choice, randrange
 
@@ -73,15 +71,25 @@ class Random_variant(QMainWindow):  # Создание рандомного ва
         else:
             self.pointer = self.pointer + 1
             self.number_question = str(randrange(1, 31))
-            self.pic1 = QPixmap(str(self.pointer) + '.' + self.number_question + '.png')
-            self.problems.setPixmap(self.pic1)
+            if self.pointer > 9:
+                self.pic1 = QPixmap('photo/' + str(self.pointer) + '.' + self.number_question + '.png')
+                self.problems.setPixmap(self.pic1)
+            else:
+                self.pic1 = QPixmap('photo/' + '0' + str(self.pointer) + '.' + self.number_question + '.png')
+                self.problems.setPixmap(self.pic1)
 
     def answer(self):  # Проверка ответа
         text = self.ans_p1.text()  # Получим текст из поля ввода
-        if text == answer_p[str(self.pointer) + '.' + self.number_question]:
-            self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно'])
+        if self.pointer > 9:
+            if text == answer_p[str(self.pointer) + '.' + self.number_question]:
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно'])
+            else:
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно'])
         else:
-            self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно'])
+            if text == answer_p['0' + str(self.pointer) + '.' + self.number_question]:
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно'])
+            else:
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно'])
 
 
 class Answer(QMainWindow):  # Вывод вердикта
@@ -264,8 +272,12 @@ class All_theory(QMainWindow):
         self.color = QPixmap('color_fon2.png')  # Ставим фон
         self.color_fon.setPixmap(self.color)
         self.setWindowTitle('Теория')
-        self.tr = QPixmap('t' + self.number_btn + '.1' + '.png')
-        self.theories.setPixmap(self.tr)
+        if int(self.number_btn) > 9:
+            self.tr = QPixmap('photo_theory/t' + self.number_btn + '.1' + '.png')
+            self.theories.setPixmap(self.tr)
+        else:
+            self.tr = QPixmap('photo_theory/t0' + self.number_btn + '.1' + '.png')
+            self.theories.setPixmap(self.tr)
         self.pointer = 1  # Указатель на номер страницы теории
         self.btn_back.clicked.connect(self.moving_back)
         self.btn_next.clicked.connect(self.moving_next)
@@ -273,55 +285,59 @@ class All_theory(QMainWindow):
     def moving_back(self):  # Вернуться к прошлой странице
         if self.pointer > 1:
             self.pointer = self.pointer - 1
-            self.pic_back = QPixmap('t' + self.number_btn + '.' + str(self.pointer) + '.png')
-            self.theories.setPixmap(self.pic_back)
+            if self.pointer > 9:
+                self.pic_back = QPixmap('photo_theory/t' + self.number_btn + '.' + str(self.pointer) + '.png')
+                self.theories.setPixmap(self.pic_back)
+            else:
+                self.pic_back = QPixmap('photo_theory/t0' + self.number_btn + '.' + str(self.pointer) + '.png')
+                self.theories.setPixmap(self.pic_back)
 
     def moving_next(self):  # Пройти на следующую строку
         # Обрабатываем для разных кнопок по-разному, тк у них разное кол-во страниц
         if self.number_btn == '1':
             if self.pointer < 6:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t1' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t01' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '2':
             if self.pointer < 5:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t2' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t02' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '3':
             if self.pointer < 5:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t3' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t03' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '4':
             if self.pointer < 12:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t4' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t04' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '5':
             if self.pointer < 14:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t5' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t05' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '6':
             if self.pointer < 51:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t6' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t06' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '7':
             if self.pointer < 15:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t7' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t07' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '8':
             if self.pointer < 13:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t8' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t08' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '9':
-            if self.pointer < 25:
+            if self.pointer < 24:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t9' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t09' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '10':
             if self.pointer < 7:
@@ -402,8 +418,12 @@ class Problem(QMainWindow):
         else:
             self.number_question = choice(self.choice_list)
             del self.choice_list[self.choice_list.index(self.number_question)]
-            self.pixmap = QPixmap(self.number_btn + '.' + str(self.number_question) + '.png')
-            self.problem_1.setPixmap(self.pixmap)
+            if int(self.number_btn) > 9:
+                self.pixmap = QPixmap('photo/' + self.number_btn + '.' + str(self.number_question) + '.png')
+                self.problem_1.setPixmap(self.pixmap)
+            else:
+                self.pixmap = QPixmap('photo' + '0' + self.number_btn + '.' + str(self.number_question) + '.png')
+                self.problem_1.setPixmap(self.pixmap)
 
     def answer(self):  # Проверка ответа
         text = self.ans_p1.text()  # Получим текст из поля ввода
@@ -422,7 +442,10 @@ class Problem_choice(QMainWindow):  # Рандомные примеры
         self.choice_list = []  # Всеразличные примеры
         for i in range(1, 13):
             for j in range(1, 13):
-                self.choice_list.append(str(i) + '.' + str(j))
+                if i > 9:
+                    self.choice_list.append(str(i) + '.' + str(j))
+                else:
+                    self.choice_list.append('0' + str(i) + '.' + str(j))
         uic.loadUi('problem_choice.ui', self)
         self.color = QPixmap('color.png')
         self.color_fon.setPixmap(self.color)
@@ -442,7 +465,7 @@ class Problem_choice(QMainWindow):  # Рандомные примеры
         else:
             self.number_question = choice(self.choice_list)
             del self.choice_list[self.choice_list.index(self.number_question)]
-            self.pixmap = QPixmap(self.number_question + '.png')
+            self.pixmap = QPixmap('photo/' + self.number_question + '.png')
             self.problem_1.setPixmap(self.pixmap)
 
     def answer(self):  # Проверка ответа
@@ -467,70 +490,74 @@ class Decision(QMainWindow):  # Ответы на все примеры
     def check(self):
         n1 = self.number_1.text()
         n2 = self.number_2.text()
-        if n1 + "." + n2 in answer_p.keys():
+        if n1 + "." + n2 in answer_p.keys() or '0' + n1 + "." + n2 in answer_p.keys():
             self.pixmap1 = QPixmap('correct.png')
             self.correct.setPixmap(self.pixmap1)
-            self.main_decision = QPixmap('r' + n1 + '.' + n2 + '.png')
-            self.fon_problem.setPixmap(self.main_decision)
+            if int(n1) > 9:
+                self.main_decision = QPixmap('photo_practice/' + 'p' + n1 + '.' + n2 + '.png')
+                self.fon_problem.setPixmap(self.main_decision)
+            else:
+                self.main_decision = QPixmap('photo_practice/' + 'p' + '0' + n1 + '.' + n2 + '.png')
+                self.fon_problem.setPixmap(self.main_decision)
         else:
             self.pixmap2 = QPixmap('nocorrect.png')
             self.correct.setPixmap(self.pixmap2)
 
 
 # Словарь из заданий и ответов к ним
-answer_p = {'1.1': '10675', '1.2': '7', '1.3': '4', '1.4': '3300', '1.5': '133', '1.6': '3000',
-            '1.7': '10800', '1.8': '21', '1.9': '12', '1.10': '5', '1.11': '9,2', '1.12': '9',
-            '1.13': '25200', '1.14': '20', '1.15': '6', '1.16': '4', '1.17': '10370', '1.18': '10',
-            '1.19': '25', '1.20': '44', '1.21': '0,9', '1.22': '90', '1.23': '20', '1.24': '6',
-            '1.25': '8', '1.26': '22,7', '1.27': '8', '1.28': '15225', '1.29': '20', '1.30': '320',
+answer_p = {'01.1': '10675', '01.2': '7', '01.3': '4', '01.4': '3300', '01.5': '133', '01.6': '3000',
+            '01.7': '10800', '01.8': '21', '01.9': '12', '01.10': '5', '01.11': '9,2', '01.12': '9',
+            '01.13': '25200', '01.14': '20', '01.15': '6', '01.16': '4', '01.17': '10370', '01.18': '10',
+            '01.19': '25', '01.20': '44', '01.21': '0,9', '01.22': '90', '01.23': '20', '01.24': '6',
+            '01.25': '8', '01.26': '22,7', '01.27': '8', '01.28': '15225', '01.29': '20', '01.30': '320',
 
-            '2.1': '25', '2.2': '6', '2.3': '72', '2.4': '18', '2.5': '7', '2.6': '28',
-            '2.7': '9', '2.8': '4', '2.9': '70000', '2.10': '465', '2.11': '3150000', '2.12': '50',
-            '2.13': '8', '2.14': '13', '2.15': '7', '2.16': '12', '2.17': '6', '2.18': '40',
-            '2.19': '12', '2.20': '24', '2.21': '4', '2.22': '6', '2.23': '2', '2.24': '8085',
-            '2.25': '8', '2.26': '3', '2.27': '13500', '2.28': '10', '2.29': '9', '2.30': '650000',
-            '3.1': '6', '3.2': '6', '3.3': '6', '3.4': '45', '3.5': '40', '3.6': '7',
+            '02.1': '25', '02.2': '6', '02.3': '72', '02.4': '18', '02.5': '7', '02.6': '28',
+            '02.7': '9', '02.8': '4', '02.9': '70000', '02.10': '465', '02.11': '3150000', '02.12': '50',
+            '02.13': '8', '02.14': '13', '02.15': '7', '02.16': '12', '02.17': '6', '02.18': '40',
+            '02.19': '12', '02.20': '24', '02.21': '4', '02.22': '6', '02.23': '2', '02.24': '8085',
+            '02.25': '8', '02.26': '3', '02.27': '13500', '02.28': '10', '02.29': '9', '02.30': '650000',
 
-            '3.7': '8', '3.8': '15', '3.9': '3', '3.10': '68', '3.11': '12', '3.12': '7.5',
-            '3.13': '28', '3.14': '10', '3.15': '6', '3.16': '36', '3.17': '2', '3.18': '2',
-            '3.19': '96', '3.20': '8', '3.21': '153', '3.22': '27', '3.23': '0.8', '3.24': '8',
-            '3.25': '14', '3.26': '25.5', '3.27': '5', '3.28': '3', '3.29': '4', '3.30': '17.5',
+            '03.1': '6', '03.2': '6', '03.3': '6', '03.4': '45', '03.5': '40', '03.6': '7',
+            '03.7': '8', '03.8': '15', '03.9': '3', '03.10': '68', '03.11': '12', '03.12': '7.5',
+            '03.13': '28', '03.14': '10', '03.15': '6', '03.16': '36', '03.17': '2', '03.18': '2',
+            '03.19': '96', '03.20': '8', '03.21': '153', '03.22': '27', '03.23': '0.8', '03.24': '8',
+            '03.25': '14', '03.26': '25.5', '03.27': '5', '03.28': '3', '03.29': '4', '03.30': '17.5',
 
-            '4.1': '0.09', '4.2': '0.52', '4.3': '0.4', '4.4': '0.28', '4.5': '0.008', '4.6': '3',
-            '4.7': '0.72', '4.8': '0.17', '4.9': '0.125', '4.10': '0.25', '4.11': '0.125', '4.12': '0.0545',
-            '4.13': '0.375', '4.14': '0.91', '4.15': '0.9', '4.16': '0.9991', '4.17': '0.21', '4.18': '0.3',
-            '4.19': '0.16', '4.20': '0.02', '4.21': '0.0625', '4.22': '0.25', '4.23': '0.23', '4.24': '0.0294',
-            '4.25': '0.25', '4.26': '0.75', '4.27': '0.25', '4.28': '0.035', '4.29': '0.8836', '4.30': '0.2',
+            '04.1': '0.09', '04.2': '0.52', '04.3': '0.4', '04.4': '0.28', '04.5': '0.008', '04.6': '3',
+            '04.7': '0.72', '04.8': '0.17', '04.9': '0.125', '04.10': '0.25', '04.11': '0.125', '04.12': '0.0545',
+            '04.13': '0.375', '04.14': '0.91', '04.15': '0.9', '04.16': '0.9991', '04.17': '0.21', '04.18': '0.3',
+            '04.19': '0.16', '04.20': '0.02', '04.21': '0.0625', '04.22': '0.25', '04.23': '0.23', '04.24': '0.0294',
+            '04.25': '0.25', '04.26': '0.75', '04.27': '0.25', '04.28': '0.035', '04.29': '0.8836', '04.30': '0.2',
 
-            '5.1': '5', '5.2': '-4', '5.3': '2', '5.4': '12.5', '5.5': '-1.5', '5.6': '-1',
-            '5.7': '-10', '5.8': '-2', '5.9': '13', '5.10': '-0.4', '5.11': '-0.2', '5.12': '1',
-            '5.13': '-124', '5.14': '4', '5.15': '5', '5.16': '-80', '5.17': '0', '5.18': '1',
-            '5.19': '-42', '5.20': '30', '5.21': '9.5', '5.22': '-6.5', '5.23': '3.5', '5.24': '-5',
-            '5.25': '31', '5.26': '2', '5.27': '13.4', '5.28': '-94', '5.29': '-4', '5.30': '3',
+            '05.1': '5', '05.2': '-4', '05.3': '2', '05.4': '12.5', '05.5': '-1.5', '05.6': '-1',
+            '05.7': '-10', '05.8': '-2', '05.9': '13', '05.10': '-0.4', '05.11': '-0.2', '05.12': '1',
+            '05.13': '-124', '05.14': '4', '05.15': '5', '05.16': '-80', '05.17': '0', '05.18': '1',
+            '05.19': '-42', '05.20': '30', '05.21': '9.5', '05.22': '-6.5', '05.23': '3.5', '05.24': '-5',
+            '05.25': '31', '05.26': '2', '05.27': '13.4', '05.28': '-94', '05.29': '-4', '05.30': '3',
 
-            '6.1': '2', '6.2': '105', '6.3': '1', '6.4': '40', '6.5': '4.8', '6.6': '49',
-            '6.7': '57', '6.8': '120', '6.9': '64', '6.10': '110.25', '6.11': '48', '6.12': '65',
-            '6.13': '30', '6.14': '40', '6.15': '49', '6.16': '28', '6.17': '60', '6.18': '58',
-            '6.19': '74', '6.20': '8', '6.21': '58', '6.22': '4', '6.23': '3.2', '6.24': '4',
-            '6.25': '104', '6.26': '152', '6.27': '160', '6.28': '24', '6.29': '9.6', '6.30': '56',
+            '06.1': '2', '06.2': '105', '06.3': '1', '06.4': '40', '06.5': '4.8', '06.6': '49',
+            '06.7': '57', '06.8': '120', '06.9': '64', '06.10': '110.25', '06.11': '48', '06.12': '65',
+            '06.13': '30', '06.14': '40', '06.15': '49', '06.16': '28', '06.17': '60', '06.18': '58',
+            '06.19': '74', '06.20': '8', '06.21': '58', '06.22': '4', '06.23': '3.2', '06.24': '4',
+            '06.25': '104', '06.26': '152', '06.27': '160', '06.28': '24', '06.29': '9.6', '06.30': '56',
 
-            '7.1': '-5', '7.2': '6', '7.3': '-3', '7.4': '7', '7.5': '44', '7.6': '3',
-            '7.7': '3', '7.8': '3', '7.9': '-1.25', '7.10': '6', '7.11': '-2', '7.12': '7',
-            '7.13': '2', '7.14': '-33', '7.15': '1', '7.16': '-5', '7.17': '-8', '7.18': '12',
-            '7.19': '14', '7.20': '2.7', '7.21': '5', '7.22': '4', '7.23': '39', '7.24': '4',
-            '7.25': '5', '7.26': '6.75', '7.27': '-19', '7.28': '20', '7.29': '5', '7.30': '7',
+            '07.1': '-5', '07.2': '6', '07.3': '-3', '07.4': '7', '07.5': '44', '07.6': '3',
+            '07.7': '3', '07.8': '3', '07.9': '-1.25', '07.10': '6', '07.11': '-2', '07.12': '7',
+            '07.13': '2', '07.14': '-33', '07.15': '1', '07.16': '-5', '07.17': '-8', '07.18': '12',
+            '07.19': '14', '07.20': '2.7', '07.21': '5', '07.22': '4', '07.23': '39', '07.24': '4',
+            '07.25': '5', '07.26': '6.75', '07.27': '-19', '07.28': '20', '07.29': '5', '07.30': '7',
 
-            '8.1': '17', '8.2': '72', '8.3': '7', '8.4': '0.95', '8.5': '140', '8.6': '10',
-            '8.7': '9', '8.8': '94', '8.9': '64', '8.10': '54', '8.11': '2744', '8.12': '1.28',
-            '8.13': '120', '8.14': '2304', '8.15': '12', '8.16': '12', '8.17': '130', '8.18': '5',
-            '8.19': '8', '8.20': '33', '8.21': '34', '8.22': '3375', '8.23': '7', '8.24': '196',
-            '8.25': '102', '8.26': '20', '8.27': '4', '8.28': '2', '8.29': '2', '8.30': '18',
+            '08.1': '17', '08.2': '72', '08.3': '7', '08.4': '0.95', '08.5': '140', '08.6': '10',
+            '08.7': '9', '08.8': '94', '08.9': '64', '08.10': '54', '08.11': '2744', '08.12': '1.28',
+            '08.13': '120', '08.14': '2304', '08.15': '12', '08.16': '12', '08.17': '130', '08.18': '5',
+            '08.19': '8', '08.20': '33', '08.21': '34', '08.22': '3375', '08.23': '7', '08.24': '196',
+            '08.25': '102', '08.26': '20', '08.27': '4', '08.28': '2', '08.29': '2', '08.30': '18',
 
-            '9.1': '4', '9.2': '49', '9.3': '-34', '9.4': '2', '9.5': '-3', '9.6': '1',
-            '9.7': '32', '9.8': '20', '9.9': '5', '9.10': '-22', '9.11': '46', '9.12': '5',
-            '9.13': '-7', '9.14': '2', '9.15': '27', '9.16': '3.75', '9.17': '12', '9.18': '13.5',
-            '9.19': '8', '9.20': '-16', '9.21': '-94', '9.22': '1', '9.23': '-9', '9.24': '6.4',
-            '9.25': '3', '9.26': '5', '9.27': '1', '9.28': '2', '9.29': '6', '9.30': '702',
+            '09.1': '4', '09.2': '49', '09.3': '-34', '09.4': '2', '09.5': '-3', '09.6': '1',
+            '09.7': '32', '09.8': '20', '09.9': '5', '09.10': '-22', '09.11': '46', '09.12': '5',
+            '09.13': '-7', '09.14': '2', '09.15': '27', '09.16': '3.75', '09.17': '12', '09.18': '13.5',
+            '09.19': '8', '09.20': '-16', '09.21': '-94', '09.22': '1', '09.23': '-9', '09.24': '6.4',
+            '09.25': '3', '09.26': '5', '09.27': '1', '09.28': '2', '09.29': '6', '09.30': '702',
 
             '10.1': '180000', '10.2': '8.8', '10.3': '15', '10.4': '2', '10.5': '0.8', '10.6': '6',
             '10.7': '4.5', '10.8': '4000', '10.9': '0.2', '10.10': '22.2', '10.11': '0.75', '10.12': '3',
