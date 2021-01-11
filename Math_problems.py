@@ -1,9 +1,13 @@
 import sys
 from PyQt5 import uic
 from PyQt5.QtGui import QPixmap
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem
 import operator
 from random import choice, randrange
+import pyqtgraph as pg
+import csv
+import math
+import datetime
 
 
 class Main_program(QMainWindow):
@@ -18,36 +22,37 @@ class Main_program(QMainWindow):
         self.pixmap = QPixmap('mathmem.jpg')
         self.pic_mem1.setPixmap(self.pixmap)
         # Включаем кнопки
-        self.btn_calculator.clicked.connect(self.calculators)
-        self.btn_oral_count.clicked.connect(self.oral_count)
-        self.btn_theory.clicked.connect(self.theories)
-        self.btn_practice.clicked.connect(self.practices)
-        self.btn_decision.clicked.connect(self.decise)
-        self.btn_randomv.clicked.connect(self.randomv)
+        list_btn = [self.btn_calculator, self.btn_oral_count, self.btn_theory, self.btn_practice, self.btn_decision,
+                    self.btn_randomv, self.btn_graph, self.btn_table]
+        for i in list_btn:
+            i.clicked.connect(self.run)
 
-    def calculators(self):
-        self.w1 = Calculator()
-        self.w1.show()
-
-    def oral_count(self):
-        self.w2 = Oral_count()
-        self.w2.show()
-
-    def theories(self):
-        self.w3 = Theory()
-        self.w3.show()
-
-    def practices(self):
-        self.w4 = Practice()
-        self.w4.show()
-
-    def decise(self):
-        self.w5 = Decision()
-        self.w5.show()
-
-    def randomv(self):
-        self.w6 = Random_variant()
-        self.w6.show()
+    def run(self):
+        text = self.sender().text()
+        if text == 'КАЛЬКУЛЯТОР':
+            self.w1 = Calculator()
+            self.w1.show()
+        elif text == 'УСТНЫЙ СЧЁТ':
+            self.w2 = Oral_count()
+            self.w2.show()
+        elif text == 'ТЕОРИЯ':
+            self.w3 = Theory()
+            self.w3.show()
+        elif text == 'ПРАКТИКА':
+            self.w4 = Practice()
+            self.w4.show()
+        elif text == 'ОТВЕТЫ':
+            self.w5 = Decision()
+            self.w5.show()
+        elif text == 'РАНДОМНЫЙ ВАРИАНТ':
+            self.w6 = Random_variant()
+            self.w6.show()
+        elif text == 'ГРАФИК':
+            self.w7 = Graph()
+            self.w7.show()
+        elif text == 'ТАБЛИЦА С РЕЗУЛЬТАТАМИ':
+            self.w8 = Table()
+            self.w8.show()
 
 
 class Random_variant(QMainWindow):  # Создание рандомного варианта из 12 задач
@@ -59,16 +64,22 @@ class Random_variant(QMainWindow):  # Создание рандомного ва
         self.color_fon.setPixmap(self.color)
         self.setWindowTitle('Случайный вариант')
         self.pointer = 0  # Указатель на то, какой сейчас вопрос решается
+        self.start = datetime.datetime.today()  # засекаем время начала
         self.doing_problem()
         self.ans_list = []  # Хранятся ответы пользователя
-        self.btn_ok_p1.clicked.connect(self.answer)
         self.btn_next_p1.clicked.connect(self.doing_problem)
 
     def doing_problem(self):  # Ищем пример из базы
         if self.pointer == 12:
-            self.v1 = Answer(self.ans_list)  # Выводим вердикт по решению варианта
+            self.answer()
+            self.end = datetime.datetime.today()  # засекаем время конца
+            self.data = f'{self.end.year}.{self.end.month}.{self.end.day}'  # пишем сегодняшнюю дату
+            self.minutes = divmod((self.end - self.start).seconds, 60)  # время в минутах и секундах
+            self.v1 = Answer(self.ans_list, self.minutes, self.data)  # Выводим вердикт по решению варианта
             self.v1.show()
         else:
+            if self.pointer > 0:
+                self.answer()
             self.pointer = self.pointer + 1
             self.number_question = str(randrange(1, 31))
             if self.pointer > 9:
@@ -82,34 +93,63 @@ class Random_variant(QMainWindow):  # Создание рандомного ва
         text = self.ans_p1.text()  # Получим текст из поля ввода
         if self.pointer > 9:
             if text == answer_p[str(self.pointer) + '.' + self.number_question]:
-                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно'])
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно', '+'])
             else:
-                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно'])
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно', '-'])
         else:
             if text == answer_p['0' + str(self.pointer) + '.' + self.number_question]:
-                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно'])
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Правильно', '+'])
             else:
-                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно'])
+                self.ans_list.append([str(self.pointer) + '.' + self.number_question, 'Неправильно', '-'])
 
 
 class Answer(QMainWindow):  # Вывод вердикта
-    def __init__(self, ans_list):
+    def __init__(self, ans_list, minutes, data):
         super().__init__()
         self.ans_list = ans_list
+        self.minutes = minutes
+        self.data = data
         uic.loadUi('answer.ui', self)
         self.setWindowTitle('Вердикт')
-        self.label_1.setText(self.ans_list[0][0] + ' вопрос: ' + self.ans_list[0][1])
-        self.label_2.setText(self.ans_list[1][0] + ' вопрос: ' + self.ans_list[1][1])
-        self.label_3.setText(self.ans_list[2][0] + ' вопрос: ' + self.ans_list[2][1])
-        self.label_4.setText(self.ans_list[3][0] + ' вопрос: ' + self.ans_list[3][1])
-        self.label_5.setText(self.ans_list[4][0] + ' вопрос: ' + self.ans_list[4][1])
-        self.label_6.setText(self.ans_list[5][0] + ' вопрос: ' + self.ans_list[5][1])
-        self.label_7.setText(self.ans_list[6][0] + ' вопрос: ' + self.ans_list[6][1])
-        self.label_8.setText(self.ans_list[7][0] + ' вопрос: ' + self.ans_list[7][1])
-        self.label_9.setText(self.ans_list[8][0] + ' вопрос: ' + self.ans_list[8][1])
-        self.label_10.setText(self.ans_list[9][0] + ' вопрос: ' + self.ans_list[9][1])
-        self.label_11.setText(self.ans_list[10][0] + ' вопрос: ' + self.ans_list[10][1])
-        self.label_12.setText(self.ans_list[11][0] + ' вопрос: ' + self.ans_list[11][1])
+        list_label = [self.label_1, self.label_2, self.label_3, self.label_4, self.label_5, self.label_6, self.label_7,
+                      self.label_8, self.label_9, self.label_10, self.label_11, self.label_12]
+        for i in range(0, 12):
+            list_label[i].setText(self.ans_list[i][0] + ' вопрос: ' + self.ans_list[i][1])
+        self.verdict.setText(f'Время выполнения: {self.minutes[0]} min. {self.minutes[1]} sec.')
+        self.btn_save.clicked.connect(self.writing)
+
+    def writing(self):  # записываем в файл данные о результате решения варианта
+        with open('table.csv', 'a', newline='') as csvfile:
+            writer = csv.writer(csvfile, delimiter=';', quotechar='"', )
+            d = list()
+            for i in range(0, 12):
+                d.append(self.ans_list[i][2])
+            d.append(f'{self.minutes[0]} min. {self.minutes[1]} sec.')
+            d.append(self.data)
+            writer.writerow(d)
+
+
+class Table(QMainWindow):  # Результаты решения пробников
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('table.ui', self)
+        self.loadTable('table.csv')
+
+    def loadTable(self, table_name):
+        with open(table_name, encoding="utf8") as csvfile:
+            reader = csv.reader(csvfile,
+                                delimiter=';', quotechar='"')
+            title = next(reader)
+            self.tableWidget.setColumnCount(len(title))
+            self.tableWidget.setHorizontalHeaderLabels(title)
+            self.tableWidget.setRowCount(0)
+            for i, row in enumerate(reader):
+                self.tableWidget.setRowCount(
+                    self.tableWidget.rowCount() + 1)
+                for j, elem in enumerate(row):
+                    self.tableWidget.setItem(
+                        i, j, QTableWidgetItem(elem))
+        self.tableWidget.resizeColumnsToContents()
 
 
 class Calculator(QMainWindow):
@@ -245,18 +285,10 @@ class Theory(QMainWindow):
         self.pixmap1 = QPixmap('mathmem3.jpeg')
         self.pic_mem2.setPixmap(self.pixmap1)
         # Включаем кнопки
-        self.btn_1.clicked.connect(self.theor)
-        self.btn_2.clicked.connect(self.theor)
-        self.btn_3.clicked.connect(self.theor)
-        self.btn_4.clicked.connect(self.theor)
-        self.btn_5.clicked.connect(self.theor)
-        self.btn_6.clicked.connect(self.theor)
-        self.btn_7.clicked.connect(self.theor)
-        self.btn_8.clicked.connect(self.theor)
-        self.btn_9.clicked.connect(self.theor)
-        self.btn_10.clicked.connect(self.theor)
-        self.btn_11.clicked.connect(self.theor)
-        self.btn_12.clicked.connect(self.theor)
+        list_btn = [self.btn_1, self.btn_2, self.btn_3, self.btn_4, self.btn_5, self.btn_6, self.btn_7, self.btn_8,
+                    self.btn_9, self.btn_10, self.btn_11, self.btn_12]
+        for i in list_btn:
+            i.clicked.connect(self.theor)
 
     def theor(self):
         self.t1 = All_theory(self.sender().text())
@@ -285,7 +317,7 @@ class All_theory(QMainWindow):
     def moving_back(self):  # Вернуться к прошлой странице
         if self.pointer > 1:
             self.pointer = self.pointer - 1
-            if self.pointer > 9:
+            if int(self.number_btn) > 9:
                 self.pic_back = QPixmap('photo_theory/t' + self.number_btn + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_back)
             else:
@@ -342,17 +374,17 @@ class All_theory(QMainWindow):
         if self.number_btn == '10':
             if self.pointer < 7:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t10' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t10' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '11':
             if self.pointer < 8:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t11' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t11' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
         if self.number_btn == '12':
             if self.pointer < 11:
                 self.pointer = self.pointer + 1
-                self.pic_next = QPixmap('t12' + '.' + str(self.pointer) + '.png')
+                self.pic_next = QPixmap('photo_theory/t12' + '.' + str(self.pointer) + '.png')
                 self.theories.setPixmap(self.pic_next)
 
 
@@ -368,88 +400,42 @@ class Practice(QMainWindow):
         self.pixmap1 = QPixmap('mathmem2.jpg')
         self.pic_mem2.setPixmap(self.pixmap1)
         # Включаем кнопки
-        self.btn_1.clicked.connect(self.pract)
-        self.btn_2.clicked.connect(self.pract)
-        self.btn_3.clicked.connect(self.pract)
-        self.btn_4.clicked.connect(self.pract)
-        self.btn_5.clicked.connect(self.pract)
-        self.btn_6.clicked.connect(self.pract)
-        self.btn_7.clicked.connect(self.pract)
-        self.btn_8.clicked.connect(self.pract)
-        self.btn_9.clicked.connect(self.pract)
-        self.btn_10.clicked.connect(self.pract)
-        self.btn_11.clicked.connect(self.pract)
-        self.btn_12.clicked.connect(self.pract)
-        self.btn_choice.clicked.connect(self.pract_choice)
+        list_btn = [self.btn_1, self.btn_2, self.btn_3, self.btn_4, self.btn_5, self.btn_6, self.btn_7, self.btn_8,
+                    self.btn_9, self.btn_10, self.btn_11, self.btn_12, self.btn_choice]
+        for i in list_btn:
+            i.clicked.connect(self.pract)
 
     def pract(self):
         self.p1 = Problem(self.sender().text())
         self.p1.show()
 
-    def pract_choice(self):
-        self.pc = Problem_choice()
-        self.pc.show()
-
 
 class Problem(QMainWindow):
     def __init__(self, number_btn):
         super().__init__()
-        self.number_question = 1
-        self.choice_list = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25,
-                            26, 27, 28, 29, 30]
-        self.number_btn = number_btn  # Номер нажатой кнопки
-        self.number_btn = self.number_btn.split()[0]
-        uic.loadUi('problem_' + self.number_btn + '.ui', self)
-        self.color = QPixmap('color.png')
-        self.color_fon.setPixmap(self.color)
-        self.setWindowTitle('Решение задач')
-        self.doing_problem()
-        self.btn_ok_p1.clicked.connect(self.answer)
-        self.btn_next_p1.clicked.connect(self.doing_problem)
-        self.btn_repeat.clicked.connect(self.repeatition)
-
-    def repeatition(self):  # Кнопка "оставить на повторение"
-        self.choice_list.append(self.number_question)
-
-    def doing_problem(self):  # Ищем пример из базы
-        if len(self.choice_list) == 0:  # Если решили все примеры
-            self.pixmap = QPixmap('congratilation.png')
-            self.problem_1.setPixmap(self.pixmap)
-        else:
-            self.number_question = choice(self.choice_list)
-            del self.choice_list[self.choice_list.index(self.number_question)]
-            if int(self.number_btn) > 9:
-                self.pixmap = QPixmap('photo/' + self.number_btn + '.' + str(self.number_question) + '.png')
-                self.problem_1.setPixmap(self.pixmap)
-            else:
-                self.pixmap = QPixmap('photo' + '0' + self.number_btn + '.' + str(self.number_question) + '.png')
-                self.problem_1.setPixmap(self.pixmap)
-
-    def answer(self):  # Проверка ответа
-        text = self.ans_p1.text()  # Получим текст из поля ввода
-        if text == answer_p[self.number_btn + '.' + str(self.number_question)]:
-            self.pixmap1 = QPixmap('true.jpg')
-            self.t_or_f_p1.setPixmap(self.pixmap1)
-        else:
-            self.pixmap2 = QPixmap('false.jpg')
-            self.t_or_f_p1.setPixmap(self.pixmap2)
-
-
-class Problem_choice(QMainWindow):  # Рандомные примеры
-    def __init__(self):
-        super().__init__()
         self.number_question = ''
-        self.choice_list = []  # Всеразличные примеры
-        for i in range(1, 13):
-            for j in range(1, 13):
-                if i > 9:
-                    self.choice_list.append(str(i) + '.' + str(j))
+        self.choice_list = []
+        self.number_btn = number_btn  # Номер нажатой кнопки
+        if self.number_btn == 'РАНДОМНЫЕ ЗАДАНИЯ':
+            for i in range(1, 13):
+                for j in range(1, 13):
+                    if i > 9:
+                        self.choice_list.append(str(i) + '.' + str(j))
+                    else:
+                        self.choice_list.append('0' + str(i) + '.' + str(j))
+            uic.loadUi('problem_choice.ui', self)
+            self.setWindowTitle('Случайные задачи')
+        else:
+            self.number_btn = self.number_btn.split()[0]
+            for i in range(1, 31):
+                if int(self.number_btn) > 9:
+                    self.choice_list.append(self.number_btn + '.' + str(i))
                 else:
-                    self.choice_list.append('0' + str(i) + '.' + str(j))
-        uic.loadUi('problem_choice.ui', self)
+                    self.choice_list.append('0' + self.number_btn + '.' + str(i))
+            uic.loadUi('problem_' + self.number_btn + '.ui', self)
+            self.setWindowTitle('Решение задач')
         self.color = QPixmap('color.png')
         self.color_fon.setPixmap(self.color)
-        self.setWindowTitle('Случайные задачи')
         self.doing_problem()
         self.btn_ok_p1.clicked.connect(self.answer)
         self.btn_next_p1.clicked.connect(self.doing_problem)
@@ -502,6 +488,66 @@ class Decision(QMainWindow):  # Ответы на все примеры
         else:
             self.pixmap2 = QPixmap('nocorrect.png')
             self.correct.setPixmap(self.pixmap2)
+
+
+class Graph(QMainWindow):  # Построение графиков
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('graph.ui', self)
+        self.setWindowTitle('Графики')
+        self.a = []
+        self.b = []
+        self.btn_create.clicked.connect(self.run1)
+        self.group.buttonClicked.connect(self.run)
+
+    def run(self, rb):
+        self.a = []
+        self.b = []
+        if rb.text() == '&y=x':
+            for i in range(-500, 500, 1):
+                self.a.append(i)
+                self.b.append(i)
+        if rb.text() == 'y=&x^2':
+            for i in range(-100, 100, 1):
+                self.a.append(i)
+                self.b.append(i ** 2)
+        if rb.text() == 'y=x^&3':
+            for i in range(-150, 150, 1):
+                self.a.append(i)
+                self.b.append(i ** 3)
+        if rb.text() == 'y = &sin(x)':
+            for i in range(-5, 5, 1):
+                for j in range(10):
+                    self.a.append(i + j / 10)
+                    self.b.append(math.sin(i + j / 10))
+        if rb.text() == 'y=&cos(x)':
+            for i in range(-5, 5, 1):
+                for j in range(10):
+                    self.a.append(i + j / 10)
+                    self.b.append(math.cos(i + j / 10))
+        if rb.text() == 'y=&1/x':
+            for i in range(-150, 150, 1):
+                if i != 0:
+                    self.a.append(i)
+                    self.a.append(i + 0.5)
+                    self.b.append(1 / i)
+                    self.b.append(1 / (i + 0.5))
+        if rb.text() == 'y=|x|':
+            for i in range(-500, 500, 1):
+                self.a.append(i)
+                self.b.append(abs(i))
+        if rb.text() == 'y=√x':
+            for i in range(0, 500, 1):
+                self.a.append(i)
+                self.b.append(math.sqrt(i))
+        if rb.text() == 'y = const':
+            for i in range(-100, 100, 1):
+                self.a.append(i)
+                self.b.append(5)
+
+    def run1(self):
+        self.graph.clear()
+        self.graph.plot(self.a, self.b, pen='r')
 
 
 # Словарь из заданий и ответов к ним
